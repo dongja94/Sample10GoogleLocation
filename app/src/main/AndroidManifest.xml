@@ -24,6 +24,10 @@
 
         <service
             android:name=".GeofencingService"
+            android:exported="true" />
+        <service
+            android:name=".MyService"
+            android:enabled="true"
             android:exported="true"></service>
     </application>
 

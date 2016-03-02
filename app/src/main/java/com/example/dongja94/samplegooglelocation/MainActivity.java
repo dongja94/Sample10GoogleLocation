@@ -23,6 +23,7 @@ import android.widget.TextView;
 import com.google.android.gms.common.ConnectionResult;
 import com.google.android.gms.common.GoogleApiAvailability;
 import com.google.android.gms.common.api.GoogleApiClient;
+import com.google.android.gms.location.ActivityRecognition;
 import com.google.android.gms.location.Geofence;
 import com.google.android.gms.location.GeofencingRequest;
 import com.google.android.gms.location.LocationListener;
@@ -54,6 +55,7 @@ public class MainActivity extends AppCompatActivity implements
         locationView = (TextView) findViewById(R.id.text_location);
         mClient = new GoogleApiClient.Builder(this)
                 .addApi(LocationServices.API)
+                .addApi(ActivityRecognition.API)
                 .addConnectionCallbacks(this)
                 .addOnConnectionFailedListener(this)
                 .build();
@@ -104,8 +106,13 @@ public class MainActivity extends AppCompatActivity implements
     @Override
     public void onConnected(Bundle bundle) {
         getLocation();
+        registerActivityRecongnition();
     }
 
+    private void registerActivityRecongnition() {
+        PendingIntent pi = null;
+        ActivityRecognition.ActivityRecognitionApi.requestActivityUpdates(mClient, 60*60*1000, pi);
+    }
     private static final int RC_PERMISSION = 1;
     private static final int RC_API_CLIENT = 2;
 
