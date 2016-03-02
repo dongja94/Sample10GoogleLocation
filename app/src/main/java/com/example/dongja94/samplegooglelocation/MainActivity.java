@@ -3,6 +3,7 @@ package com.example.dongja94.samplegooglelocation;
 import android.Manifest;
 import android.app.Activity;
 import android.app.Dialog;
+import android.app.PendingIntent;
 import android.content.Intent;
 import android.content.IntentSender;
 import android.content.pm.PackageManager;
@@ -22,6 +23,8 @@ import android.widget.TextView;
 import com.google.android.gms.common.ConnectionResult;
 import com.google.android.gms.common.GoogleApiAvailability;
 import com.google.android.gms.common.api.GoogleApiClient;
+import com.google.android.gms.location.Geofence;
+import com.google.android.gms.location.GeofencingRequest;
 import com.google.android.gms.location.LocationListener;
 import com.google.android.gms.location.LocationRequest;
 import com.google.android.gms.location.LocationServices;
@@ -60,8 +63,30 @@ public class MainActivity extends AppCompatActivity implements
         }
     }
 
+    boolean isFirst = true;
+
     private void displayLocation(Location location) {
         locationView.setText("lat : " + location.getLatitude() + ", lng :" + location.getLongitude());
+        if (isFirst) {
+            isFirst = false;
+            Geofence geofence = new Geofence.Builder()
+                    .setCircularRegion(location.getLatitude(), location.getLongitude(), 100)
+                    .setExpirationDuration(24 * 60 * 60 * 1000)
+                    .setTransitionTypes(Geofence.GEOFENCE_TRANSITION_ENTER | Geofence.GEOFENCE_TRANSITION_EXIT | Geofence.GEOFENCE_TRANSITION_DWELL)
+                    .setLoiteringDelay(60 * 60 * 1000)
+                    .setNotificationResponsiveness(90 * 1000)
+                    .build();
+            GeofencingRequest request = new GeofencingRequest.Builder()
+                    .addGeofence(geofence)
+                    .setInitialTrigger(GeofencingRequest.INITIAL_TRIGGER_ENTER)
+                    .build();
+            PendingIntent pi = PendingIntent.getService(this, 0, new Intent(this, GeofencingService.class),
+                    PendingIntent.FLAG_UPDATE_CURRENT);
+            if (ActivityCompat.checkSelfPermission(this, Manifest.permission.ACCESS_FINE_LOCATION) != PackageManager.PERMISSION_GRANTED) {
+                return;
+            }
+            LocationServices.GeofencingApi.addGeofences(mClient, request, pi);
+        }
     }
 
     @Override
